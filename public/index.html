@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edufriend - Smart Education Assistant</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #34495e;
+      font-weight: bold;
+    }
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      resize: vertical;
+      font-size: 16px;
+      font-family: inherit;
+    }
+    button {
+      background-color: #3498db;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    .response {
+      margin-top: 30px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+    }
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .error {
+      color: #e74c3c;
+      margin-top: 10px;
+    }
+    /* Markdown Styling */
+    .markdown-body {
+      padding: 20px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+    .markdown-body h1 {
+      border-bottom: 1px solid #eaecef;
+      padding-bottom: 0.3em;
+    }
+    .markdown-body h2 {
+      margin-top: 24px;
+      margin-bottom: 16px;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+    .markdown-body ul {
+      padding-left: 2em;
+    }
+    .markdown-body li {
+      margin: 4px 0;
+    }
+    .markdown-body code {
+      padding: 0.2em 0.4em;
+      background-color: rgba(27,31,35,0.05);
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Edufriend - Smart Education Assistant</h1>
+    <form id="query-form">
+      <div class="form-group">
+        <label for="user-input">Tanyakan tentang jurusan dan universitas:</label>
+        <textarea 
+          id="user-input" 
+          rows="4" 
+          required 
+          placeholder="Contoh: Saya suka matematika dan komputer. Nilai akademik saya bagus di bidang eksak. Kira-kira jurusan apa yang cocok untuk saya?"
+        ></textarea>
+      </div>
+      <button type="submit">Kirim Pertanyaan</button>
+    </form>
+    <div class="loading" id="loading">
+      Memproses pertanyaan Anda...
+    </div>
+    <div class="response" id="response-container">
+      <div class="markdown-body" id="response-text">
+        <h2>Silakan ajukan pertanyaan Anda...</h2>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('query-form');
+    const responseText = document.getElementById('response-text');
+    const loading = document.getElementById('loading');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const userInput = document.getElementById('user-input').value;
+      
+      loading.style.display = 'block';
+      responseText.innerHTML = '<h3>Memproses...</h3>';
+
+      try {
+        const response = await fetch('/api/query', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ query: userInput }),
+        });
+
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        responseText.innerHTML = data.response || '<p>Tidak ada jawaban diterima</p>';
+      } catch (error) {
+        responseText.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+      } finally {
+        loading.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
